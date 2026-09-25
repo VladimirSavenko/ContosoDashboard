@@ -1,50 +1,77 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: unversioned scaffold -> 1.0.0
+- Modified principles: five scaffold placeholders -> Offline-First Architecture,
+	Security by Design, Testable Requirements, Layered Simplicity, and Observable UX
+- Added sections: Security and Architecture Constraints; Development Workflow and
+	Quality Gates
+- Removed sections: none
+- Follow-up TODOs: Confirm the original ratification date.
+-->
+
+# ContosoDashboard Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Offline-First Architecture
+Features MUST work with the local SQLite database and local infrastructure abstractions
+without requiring external services. Infrastructure dependencies MUST be accessed through
+interfaces so that cloud implementations can be substituted without changing business
+logic. This preserves reliable offline training and a credible migration path.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Security by Design
+Authentication and authorization MUST be enforced at the page and service boundaries.
+Services MUST verify access to user-owned or project-scoped data, preventing IDOR and
+unauthorized disclosure. New security-sensitive behavior MUST include a focused test or
+documented verification step. Training shortcuts MUST remain clearly separated from
+production security requirements.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Testable Requirements
+Every feature MUST define observable acceptance behavior, including empty, error, and
+unauthorized states where applicable. Business rules MUST be covered by automated tests
+or by a documented manual verification procedure when automation is impractical. A change
+is incomplete until its relevant checks pass.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Layered Simplicity
+Changes MUST respect the separation between pages, services, data access, and models.
+Business logic MUST reside in services rather than UI components or persistence details.
+The simplest design that satisfies the requirements MUST be preferred; added abstraction
+or complexity MUST have a documented reason.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Observable UX
+User-facing workflows MUST communicate loading, success, empty, and failure states clearly.
+Displayed aggregates, dates, permissions, and currency values MUST be unambiguous and
+reconcilable with their source data. Navigation and feedback MUST remain usable on the
+supported desktop and mobile layouts.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Security and Architecture Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+The application MUST remain suitable for offline training: SQLite is the default data
+store, external service calls are out of scope unless explicitly specified, and mock
+authentication MUST NOT be represented as production-ready identity. Changes MUST retain
+the existing ASP.NET Core, Blazor Server, Entity Framework Core, and dependency-injection
+patterns unless a feature specification explicitly justifies a change. Secrets and
+credentials MUST NOT be committed.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow and Quality Gates
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Work MUST begin with a written feature specification when behavior or scope changes.
+Plans and task breakdowns MUST remain consistent with that specification. Before a change
+is considered complete, the author MUST run the narrowest relevant tests or build checks,
+verify authorization-sensitive paths, and document any unavailable validation. Reviews
+MUST check requirements coverage, security boundaries, layering, and meaningful empty or
+error states.
 
 ## Governance
 <!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution governs feature specifications, plans, implementation, and reviews in
+this repository. Amendments MUST be made through the constitution workflow, include a
+Sync Impact Report, explain affected principles, and update the amendment date. Versioning
+follows semantic versioning: MAJOR for incompatible governance changes, MINOR for added
+or materially expanded principles, and PATCH for clarifications or non-semantic wording
+changes. Every review MUST assess compliance with these principles; any exception MUST
+state its scope, rationale, risk, and follow-up owner or task. The constitution MUST be
+reviewed whenever the technology stack, security model, or training purpose changes.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-09-25
