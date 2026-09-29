@@ -5,6 +5,15 @@
 **Status**: Draft  
 **Input**: User description: `--file StakeholderDocs/document-upload-and-management-feature.md`
 
+## Clarifications
+
+### Session 2026-09-25
+
+- Q: How should uploads behave when the required malware scan is unavailable in the offline training environment? -> A: Quarantine the upload and block access until scanning succeeds.
+- Q: Should project-associated documents be visible to all authorized project members by default, while personal documents remain owner-only until explicitly shared? -> A: Project documents are visible to authorized project members; personal documents require explicit sharing.
+- Q: After a document is permanently deleted, should its activity record remain available to administrators? -> A: Retain audit metadata, but remove the file and document content permanently.
+- Q: When a document is shared with a team, should access follow the team's current membership or only the members present when sharing occurs? -> A: Current team members gain access; removed members lose access.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Upload and Categorize Documents (Priority: P1)
@@ -94,12 +103,16 @@ As an administrator, I want document activity and summary reports so that I can 
 
 - A file larger than 25 MB or with an unsupported extension must be rejected before it becomes available to other users.
 - A file with a missing, misleading, or unknown content type must not be silently treated as an allowed type.
+- A file awaiting or failing malware scanning must remain quarantined and inaccessible until scanning succeeds; the user must receive a clear status or failure message.
 - A multi-file upload may partially fail; each file must have a distinct result and successful files must remain usable.
 - A file save can fail after validation; the system must not leave a document record that points to a missing file.
 - A user may lose project membership between opening the page and performing an action; the latest authorization decision must control the result.
+- A personal document must not become visible to project members solely because it has no project association; it remains owner-only until explicitly shared.
 - A project or task can be deleted or become unavailable while associated documents remain; the document must show a clear unassigned state or follow the product's deletion policy without exposing data.
+- Permanently deleting a document must remove its file and content while retaining non-content activity metadata for administrator audit reports.
 - Search and filters must return an explicit empty state rather than showing all documents when criteria are invalid or unmatched.
 - A document can be shared with a user who already has access; sharing must not create duplicate access or duplicate notifications.
+- A team member who joins after a team share must gain access, while a member removed from the team must lose access without requiring the owner to reshare the document.
 - Replacing a file must preserve the document's metadata and authorization rules while ensuring the old file is no longer downloadable.
 - A document title, description, or tag may contain unsafe markup or very long text; displayed values must remain safe and usable.
 - Upload, search, preview, and list operations must show user-friendly errors while leaving navigation and retry actions usable.
@@ -116,7 +129,7 @@ As an administrator, I want document activity and summary reports so that I can 
 - **FR-006**: The system MUST require a document title and one category from the predefined categories Project Documents, Team Resources, Personal Files, Reports, Presentations, or Other.
 - **FR-007**: The system MUST allow an optional description, project association, and user-defined tags for each document.
 - **FR-008**: The system MUST record the upload time, uploader, file size, and file type for every accepted document.
-- **FR-009**: The system MUST complete a malware or virus safety check before an uploaded file is made available for access.
+- **FR-009**: The system MUST complete a malware or virus safety check before an uploaded file is made available for access and MUST quarantine files while scanning is unavailable or incomplete.
 - **FR-010**: The system MUST store uploaded files in a non-public location and apply authorization checks to every access path.
 - **FR-011**: The system MUST generate a unique, non-user-controlled storage identity for each file and MUST NOT use an original filename as the storage path.
 - **FR-012**: The system MUST show upload progress and a distinct success or error result for each submitted file.
@@ -125,7 +138,7 @@ As an administrator, I want document activity and summary reports so that I can 
 - **FR-015**: The system MUST allow users to filter their document list by category, associated project, and date range.
 - **FR-016**: The system MUST allow users to search authorized documents by title, description, tags, uploader, or associated project.
 - **FR-017**: The system MUST exclude documents from list, search, preview, download, and report results when the requesting user lacks access.
-- **FR-018**: The system MUST show all documents associated with a project to authorized project members.
+- **FR-018**: The system MUST show all documents associated with a project to authorized project members by default.
 - **FR-019**: The system MUST allow project managers to upload documents to projects they manage.
 - **FR-020**: The system MUST allow authorized users to download documents they can access.
 - **FR-021**: The system MUST allow authorized users to preview PDF and image documents in the browser when preview is supported.
@@ -133,10 +146,10 @@ As an administrator, I want document activity and summary reports so that I can 
 - **FR-023**: The system MUST allow document owners to replace a document file while preserving its metadata and authorization rules.
 - **FR-024**: The system MUST allow document owners to delete their documents after confirmation.
 - **FR-025**: The system MUST allow project managers to delete documents associated with projects they manage.
-- **FR-026**: The system MUST permanently remove deleted document content from user-accessible storage and views.
-- **FR-027**: The system MUST allow document owners to share documents with selected users or teams.
+- **FR-026**: The system MUST permanently remove deleted document files and content from user-accessible storage and views while retaining non-content activity metadata for administrator audit reports.
+- **FR-027**: The system MUST allow document owners to share personal documents and other accessible documents with selected users or teams; explicit sharing MUST NOT be required for authorized project members to access project-associated documents.
 - **FR-028**: The system MUST notify recipients when a document is shared with them and show shared documents in a dedicated shared-documents view.
-- **FR-029**: The system MUST prevent duplicate access grants and duplicate sharing notifications for an already-authorized recipient.
+- **FR-029**: The system MUST prevent duplicate access grants and duplicate sharing notifications for an already-authorized recipient, and team-shared access MUST follow current team membership.
 - **FR-030**: The system MUST allow authorized users to view and attach related documents from task details.
 - **FR-031**: The system MUST associate a document uploaded from a task with that task's project.
 - **FR-032**: The system MUST show each user's five most recent uploads in a dashboard Recent Documents area.
@@ -163,12 +176,13 @@ As an administrator, I want document activity and summary reports so that I can 
 ## Assumptions and Constraints
 
 - Existing authenticated users and role definitions remain the source of identity and permission context.
-- Employees may upload personal documents and documents for projects to which they belong; team leads may manage documents for their teams; project managers may manage documents for projects they manage; administrators have full document access and reporting access.
+- Employees may upload personal documents and documents for projects to which they belong; team leads may manage documents for their teams; project managers may manage documents for projects they manage; administrators have full document access and reporting access. Project-associated documents are visible to authorized project members by default, while personal documents are owner-only until explicitly shared.
+- Team shares are dynamic: current team members can access the shared document and users who leave the team lose that access.
 - The training environment uses local filesystem storage outside public web content and must remain usable without cloud services.
 - The feature must fit the existing application architecture and preserve a future migration path to cloud storage through a storage abstraction.
 - Files are limited to 25 MB each, and the first release uses one application-wide file storage policy rather than per-user quotas.
-- Virus or malware scanning is a release gate for availability; the exact scanning provider is an implementation decision and is outside this specification.
-- Document deletion is permanent after confirmation; retention, legal holds, and recovery are outside this feature.
+- Virus or malware scanning is a release gate for availability; files remain quarantined and inaccessible while scanning is unavailable or incomplete. The exact scanning provider is an implementation decision and is outside this specification.
+- Document deletion is permanent after confirmation for files and document content; non-content activity metadata remains for administrator audit reporting. Legal holds and recovery are outside this feature.
 - Search results are expected within 2 seconds, document lists within 2 seconds for up to 500 documents, previews within 3 seconds, and uploads within 30 seconds for files up to 25 MB on typical network conditions.
 - The feature is planned for delivery within the stakeholder-provided 8-10 week development window.
 
